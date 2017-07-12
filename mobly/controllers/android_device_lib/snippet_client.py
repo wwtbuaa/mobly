@@ -23,7 +23,7 @@ from mobly.controllers.android_device_lib import jsonrpc_client_base
 _INSTRUMENTATION_RUNNER_PACKAGE = (
     'com.google.android.mobly.snippet.SnippetRunner')
 
-_LAUNCH_CMD_V1 = (
+_LAUNCH_CMD = (
     'am instrument -w -e action start %s/' + _INSTRUMENTATION_RUNNER_PACKAGE)
 
 _STOP_CMD = (
@@ -65,9 +65,13 @@ class SnippetClient(jsonrpc_client_base.JsonRpcClientBase):
         """Overrides superclass. Launches a snippet app and connects to it."""
         self._check_app_installed()
 
+        # Use info here so people can follow along with the snippet startup
+        # process. Starting snippets can be slow, especially if there are
+        # multiple, and this avoids the perception that the framework is hanging
+        # for a long time doing nothing.
         self.log.info('Launching snippet apk %s with protocol v1',
                       self.package)
-        cmd = _LAUNCH_CMD_V1 % self.package
+        cmd = _LAUNCH_CMD % self.package
         start_time = time.time()
         self._proc = self._do_start_app(cmd)
 
@@ -85,7 +89,9 @@ class SnippetClient(jsonrpc_client_base.JsonRpcClientBase):
 
         # Forward the device port to a new host port, and connect to that port
         self.host_port = utils.get_available_host_port()
-        self._connect_to_v1()
+        self._adb.forward(
+            ['tcp:%d' % self.host_port, 'tcp:%d' % self.device_port])
+        self.connect()
 
         # Yaaay! We're done!
         self.log.debug('Snippet %s started after %.1fs on host port %s',
@@ -108,8 +114,10 @@ class SnippetClient(jsonrpc_client_base.JsonRpcClientBase):
             AppRestoreConnectionError: When the app was not able to be started.
         """
         self.host_port = port or utils.get_available_host_port()
+        self._adb.forward(
+            ['tcp:%d' % self.host_port, 'tcp:%d' % self.device_port])
         try:
-            self._connect_to_v1()
+            self.connect()
         except:
             # Failed to connect to app, something went wrong.
             raise jsonrpc_client_base.AppRestoreConnectionError(
@@ -194,11 +202,6 @@ class SnippetClient(jsonrpc_client_base.JsonRpcClientBase):
             adb_cmd += ['-s', self._adb.serial]
         adb_cmd += ['shell', launch_cmd]
         return utils.start_standing_subprocess(adb_cmd, shell=False)
-
-    def _connect_to_v1(self):
-        self._adb.forward(
-            ['tcp:%d' % self.host_port, 'tcp:%d' % self.device_port])
-        self.connect()
 
     def _read_protocol_line(self):
         """Reads the next line of instrumentation output relevant to snippets.
