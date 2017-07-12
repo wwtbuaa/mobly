@@ -162,9 +162,9 @@ class SnippetClientTest(jsonrpc_client_test_base.JsonRpcClientTestBase):
                 'utils.start_standing_subprocess')
     @mock.patch('mobly.controllers.android_device_lib.snippet_client.'
                 'utils.get_available_host_port')
-    def test_snippet_start_app_and_connect_v1(self, mock_get_port,
-                                              mock_start_standing_subprocess,
-                                              mock_create_connection):
+    def test_snippet_start_app_and_connect(self, mock_get_port,
+                                           mock_start_standing_subprocess,
+                                           mock_create_connection):
         self.setup_mock_socket_file(mock_create_connection)
         self._setup_mock_instrumentation_cmd(
             mock_start_standing_subprocess,
@@ -217,7 +217,7 @@ class SnippetClientTest(jsonrpc_client_test_base.JsonRpcClientTestBase):
                 'utils.start_standing_subprocess')
     @mock.patch('mobly.controllers.android_device_lib.snippet_client.'
                 'utils.get_available_host_port')
-    def test_snippet_start_app_and_connect_v1_header_junk(
+    def test_snippet_start_app_and_connect_header_junk(
             self, mock_get_port, mock_start_standing_subprocess,
             mock_create_connection):
         self.setup_mock_socket_file(mock_create_connection)
