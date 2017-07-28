@@ -248,7 +248,7 @@ class BaseTestTest(unittest.TestCase):
     def test_teardown_test_assert_fail(self):
         class MockBaseTest(base_test.BaseTestClass):
             def teardown_test(self):
-                asserts.assert_true(False, MSG_EXPECTED_EXCEPTION)
+                asserts.fail(MSG_EXPECTED_EXCEPTION)
 
             def test_something(self):
                 pass
@@ -257,7 +257,8 @@ class BaseTestTest(unittest.TestCase):
         bt_cls.run()
         actual_record = bt_cls.results.error[0]
         self.assertEqual(actual_record.test_name, self.mock_test_name)
-        self.assertIsNone(actual_record.details)
+        self.assertEqual(actual_record.details,
+                         'teardown_test: ' + MSG_EXPECTED_EXCEPTION)
         self.assertIsNone(actual_record.extras)
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
@@ -275,10 +276,10 @@ class BaseTestTest(unittest.TestCase):
         bt_cls.run()
         actual_record = bt_cls.results.error[0]
         self.assertEqual(actual_record.test_name, self.mock_test_name)
-        self.assertIsNone(actual_record.details)
+        self.assertEqual(actual_record.details,
+                         'teardown_test: ' + MSG_EXPECTED_EXCEPTION)
         self.assertIsNone(actual_record.extras)
-        expected_extra_error = {"teardown_test": MSG_EXPECTED_EXCEPTION}
-        self.assertEqual(actual_record.extra_errors, expected_extra_error)
+        self.assertFalse(actual_record.extra_errors)
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
         self.assertEqual(bt_cls.results.summary_str(), expected_summary)
@@ -373,7 +374,8 @@ class BaseTestTest(unittest.TestCase):
         my_mock.assert_called_once_with("on_fail")
         actual_record = bt_cls.results.error[0]
         self.assertEqual(actual_record.test_name, self.mock_test_name)
-        self.assertIsNone(actual_record.details)
+        self.assertEqual(actual_record.details,
+                         'teardown_test: ' + MSG_EXPECTED_EXCEPTION)
         self.assertIsNone(actual_record.extras)
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
@@ -425,8 +427,9 @@ class BaseTestTest(unittest.TestCase):
         actual_record = bt_cls.results.error[0]
         self.assertEqual(actual_record.test_name, self.mock_test_name)
         self.assertEqual(actual_record.details, MSG_EXPECTED_EXCEPTION)
-        self.assertEqual(actual_record.extra_errors,
-                         {'teardown_test': 'This is an expected exception.ha'})
+        self.assertEqual(
+            str(actual_record.extra_errors['teardown_test']),
+            'This is an expected exception.ha')
         self.assertIsNone(actual_record.extras)
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
@@ -488,8 +491,8 @@ class BaseTestTest(unittest.TestCase):
         bt_cls = MockBaseTest(self.mock_test_cls_configs)
         bt_cls.run()
         actual_record = bt_cls.results.error[0]
-        expected_extra_error = {'_on_pass': expected_msg}
-        self.assertEqual(actual_record.extra_errors, expected_extra_error)
+        self.assertEqual(
+            str(actual_record.extra_errors['_on_pass']), expected_msg)
         self.assertEqual(actual_record.test_name, self.mock_test_name)
         self.assertEqual(actual_record.details, MSG_EXPECTED_EXCEPTION)
         self.assertIsNone(actual_record.extras)
@@ -511,8 +514,10 @@ class BaseTestTest(unittest.TestCase):
         self.assertEqual(actual_record.test_name, self.mock_test_name)
         self.assertEqual(actual_record.details, "Test Body Exception.")
         self.assertIsNone(actual_record.extras)
-        self.assertEqual(actual_record.extra_errors["teardown_test"],
-                         "Details=This is an expected exception., Extras=None")
+        # self.assertIsNone(actual_record.to_dict())
+        self.assertEqual(
+            str(actual_record.extra_errors["teardown_test"]),
+            "Details=This is an expected exception., Extras=None")
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
         self.assertEqual(bt_cls.results.summary_str(), expected_summary)
@@ -534,8 +539,9 @@ class BaseTestTest(unittest.TestCase):
         self.assertEqual(actual_record.test_name, self.mock_test_name)
         self.assertEqual(actual_record.details, "Test Passed!")
         self.assertIsNone(actual_record.extras)
-        self.assertEqual(actual_record.extra_errors["teardown_test"],
-                         "Details=This is an expected exception., Extras=None")
+        self.assertEqual(
+            str(actual_record.extra_errors["teardown_test"]),
+            "Details=This is an expected exception., Extras=None")
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
         self.assertEqual(bt_cls.results.summary_str(), expected_summary)
@@ -555,8 +561,9 @@ class BaseTestTest(unittest.TestCase):
         self.assertEqual(actual_record.test_name, self.mock_test_name)
         self.assertEqual(actual_record.details, MSG_EXPECTED_EXCEPTION)
         self.assertEqual(actual_record.extras, MOCK_EXTRA)
-        self.assertEqual(actual_record.extra_errors,
-                         {'_on_pass': MSG_EXPECTED_EXCEPTION})
+        self.assertEqual(
+            str(actual_record.extra_errors['_on_pass']),
+            MSG_EXPECTED_EXCEPTION)
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
         self.assertEqual(bt_cls.results.summary_str(), expected_summary)
@@ -576,8 +583,9 @@ class BaseTestTest(unittest.TestCase):
         self.assertEqual(actual_record.test_name, self.mock_test_name)
         self.assertEqual(actual_record.details, MSG_EXPECTED_EXCEPTION)
         self.assertEqual(actual_record.extras, MOCK_EXTRA)
-        self.assertEqual(actual_record.extra_errors,
-                         {'_on_fail': MSG_EXPECTED_EXCEPTION})
+        self.assertEqual(
+            str(actual_record.extra_errors['_on_fail']),
+            MSG_EXPECTED_EXCEPTION)
         expected_summary = ("Error 1, Executed 1, Failed 0, Passed 0, "
                             "Requested 1, Skipped 0")
         self.assertEqual(bt_cls.results.summary_str(), expected_summary)
