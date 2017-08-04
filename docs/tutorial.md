@@ -70,9 +70,9 @@ specify particular devices by serial number and attach extra attributes to the o
  
 ```yaml
 AndroidDevice:
-  - serial: xyz,
-    phone_number: 123456,
-  - serial: abc,
+  - serial: xyz
+    phone_number: 123456
+  - serial: abc
     label: golden_device
 ```
  
@@ -166,17 +166,17 @@ DefaultParams: &DefaultParams
     favorite_food: green eggs and ham.
  
 TestBeds:
-  - Name: XyzTestBed,
+  - Name: XyzTestBed
     Controllers:
         AndroidDevice:
-          - serial: xyz,
+          - serial: xyz
             phone_number: 123456
     TestParams:
         <<: *DefaultParams
-  - Name: AbcTestBed,
+  - Name: AbcTestBed
     Controllers:
         AndroidDevice:
-          - serial: abc,
+          - serial: abc
             label: golden_device
     TestParams:
         <<: *DefaultParams
@@ -203,15 +203,15 @@ writing, like asserts, device debug tag, and general logging vs logging with dev
  
 ```yaml
 TestBeds:
-  - Name: TwoDeviceTestBed,
+  - Name: TwoDeviceTestBed
     Controllers:
         AndroidDevice:
-          - serial: xyz,
+          - serial: xyz
             label: target
-          - serial: abc,
+          - serial: abc
             label: discoverer
     TestParams:
-        bluetooth_name: MagicBluetooth,
+        bluetooth_name: MagicBluetooth
         bluetooth_timeout: 5
 
 ```
